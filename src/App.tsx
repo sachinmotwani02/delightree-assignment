@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, forwardRef } from "react";
 import {
   Box,
   Button,
@@ -12,21 +12,22 @@ import {
   Grid,
   GridItem,
   InputLeftAddon,
+  Text,
   IconButton,
   InputGroup,
   InputRightElement,
 } from "@chakra-ui/react";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useForm, SubmitHandler, Controller, useFormState } from "react-hook-form";
 import { Select, chakraComponents, OptionProps } from "chakra-react-select";
 import { CheckIcon, AddIcon, CloseIcon } from "@chakra-ui/icons";
 import "react-datepicker/dist/react-datepicker.css";
 import "./App.css";
-import FormDataDisplay from "./FormDataDisplay";
+import { format, formatDate, parse } from "date-fns";
 
 type FormValues = {
   firstName: string;
   lastName: string;
-  gender: string;
+  gender: { label: string; value: string } | null;
   dateOfBirth: string;
   techStack: string[];
   email: string;
@@ -52,31 +53,45 @@ const App: React.FC = () => {
     handleSubmit,
     register,
     trigger,
+    getValues,
     control,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>();
-
-  const [formData, setFormData] = useState<FormValues>({
-    firstName: "",
-    lastName: "",
-    gender: "",
-    dateOfBirth: "",
-    techStack: [],
-    email: "",
-    phoneNumber: "",
+  } = useForm<FormValues>({
+    defaultValues: {
+      // Set default form values
+      firstName: "",
+      lastName: "",
+      gender: null,
+      dateOfBirth: "",
+      techStack: [],
+      email: "",
+      phoneNumber: "",
+    },
   });
 
+  const { isSubmitSuccessful, dirtyFields } = useFormState<FormValues>({ control });
+
+  // const [formData, setFormData] = useState<FormValues>({
+  //   firstName: "",
+  //   lastName: "",
+  //   gender: "",
+  //   dateOfBirth: "",
+  //   techStack: [],
+  //   email: "",
+  //   phoneNumber: "",
+  // });
+
   const toast = useToast();
+
+  const [showFormData, setShowFormData] = useState(false);
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     setIsLoading(true);
 
     setTimeout(() => {
-      // Set loading state back to false after 3 seconds
       setIsLoading(false);
-      setFormData(data);
-
+      setShowFormData(true);
       toast({
         title: "Form Submitted",
         description: "You have successfully filled your form.",
@@ -362,8 +377,91 @@ const App: React.FC = () => {
           </GridItem>
         </Grid>
       </form>
-      {formData && <FormDataDisplay formData={formData} />}
+
+      {isSubmitSuccessful && showFormData && (
+        <Box mt={8}>
+          <Heading size="md" mb={4}>
+            Form Data
+          </Heading>
+          <Flex direction="column" bg="gray.50" p={6} borderRadius="md" boxShadow="md">
+            <FormDataDisplay formData={mergeFormData(getValues(), dirtyFields)} />
+          </Flex>
+        </Box>
+      )}
     </Box>
+  );
+};
+const mergeFormData = (initialValues: FormValues, dirtyFields: any): FormValues => {
+  const mergedData: FormValues = {
+    firstName: typeof dirtyFields.firstName === "boolean" ? initialValues.firstName : dirtyFields.firstName || "",
+    lastName: typeof dirtyFields.lastName === "boolean" ? initialValues.lastName : dirtyFields.lastName || "",
+    gender: typeof dirtyFields.gender === "boolean" ? initialValues.gender : dirtyFields.gender || "",
+    dateOfBirth:
+      typeof dirtyFields.dateOfBirth === "boolean" ? initialValues.dateOfBirth : dirtyFields.dateOfBirth || "",
+    techStack: Array.isArray(dirtyFields.techStack)
+      ? dirtyFields.techStack
+      : Array.isArray(initialValues.techStack)
+      ? initialValues.techStack
+      : [],
+    email: typeof dirtyFields.email === "boolean" ? initialValues.email : dirtyFields.email || "",
+    phoneNumber:
+      typeof dirtyFields.phoneNumber === "boolean" ? initialValues.phoneNumber : dirtyFields.phoneNumber || "",
+  };
+
+  return mergedData;
+};
+interface FormDataDisplayProps {
+  formData: FormValues;
+}
+
+const FormDataDisplay: React.FC<FormDataDisplayProps> = ({ formData }) => {
+  console.log(formData);
+  const formatDate = (date: string) => {
+    try {
+      const parsedDate = parse(date, "yyyy-MM-dd", new Date());
+      return format(parsedDate, "dd/MMM/yyyy");
+    } catch (error) {
+      console.error("Error parsing date:", error);
+      return;
+    }
+  };
+  return (
+    <Flex direction="column">
+      <Flex justify="space-between" mb={4} align="center">
+        <Text fontWeight="semibold">First Name</Text>
+        <Text>{formData.firstName || "Not provided"}</Text>
+      </Flex>
+
+      <Flex justify="space-between" mb={4} align="center">
+        <Text fontWeight="semibold">Last Name</Text>
+        <Text>{formData.lastName || "Not provided"}</Text>
+      </Flex>
+
+      <Flex justify="space-between" mb={4} align="center">
+        <Text fontWeight="semibold">Gender</Text>
+        <Text>{formData.gender ? formData.gender.label : "Not provided"}</Text>
+      </Flex>
+
+      <Flex justify="space-between" mb={4} align="center">
+        <Text fontWeight="semibold">Date Of Birth</Text>
+        <Text>{formatDate(formData.dateOfBirth) || "Not provided"}</Text>
+      </Flex>
+
+      <Flex justify="space-between" mb={4} align="center">
+        <Text fontWeight="semibold">Tech Stack</Text>
+        <Text>{formData.techStack?.join(", ") || "Not provided"}</Text>
+      </Flex>
+
+      <Flex justify="space-between" mb={4} align="center">
+        <Text fontWeight="semibold">Phone Number</Text>
+        <Text>{formData.phoneNumber || "Not provided"}</Text>
+      </Flex>
+
+      <Flex justify="space-between" mb={4} align="center">
+        <Text fontWeight="semibold">Email</Text>
+        <Text>{formData.email || "Not provided"}</Text>
+      </Flex>
+    </Flex>
   );
 };
 
