@@ -22,7 +22,7 @@ import { Select, chakraComponents, OptionProps } from "chakra-react-select";
 import { CheckIcon, AddIcon, CloseIcon } from "@chakra-ui/icons";
 import "react-datepicker/dist/react-datepicker.css";
 import "./App.css";
-import { format, formatDate, parse } from "date-fns";
+import { format, parse } from "date-fns";
 
 type FormValues = {
   firstName: string;
@@ -71,16 +71,6 @@ const App: React.FC = () => {
   });
 
   const { isSubmitSuccessful, dirtyFields } = useFormState<FormValues>({ control });
-
-  // const [formData, setFormData] = useState<FormValues>({
-  //   firstName: "",
-  //   lastName: "",
-  //   gender: "",
-  //   dateOfBirth: "",
-  //   techStack: [],
-  //   email: "",
-  //   phoneNumber: "",
-  // });
 
   const toast = useToast();
 
@@ -282,7 +272,7 @@ const App: React.FC = () => {
                   required: "Date of Birth is required",
                   validate: (value) => {
                     const today = new Date();
-                    // const selectedDate = parse(value, "dd-MM-yyyy", new Date());
+
                     if (new Date(value) > today) {
                       return "Invalid date";
                     }
@@ -297,8 +287,7 @@ const App: React.FC = () => {
                     max={new Date().toISOString().split("T")[0]}
                     onChange={(e) => {
                       const selectedDate = e.target.value;
-                      // const formattedDate = formatDate(selectedDate);
-                      // setFormattedDate(formattedDate);
+
                       onChange(selectedDate);
                     }}
                     value={value || ""}
