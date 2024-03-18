@@ -230,7 +230,7 @@ const App: React.FC = () => {
                     id="gender"
                     variant="filled"
                     options={options}
-                    closeMenuOnSelect={false}
+                    // closeMenuOnSelect={false}
                     className="chakra-react-select"
                     classNamePrefix="chakra-react-select"
                     placeholder="Select Gender"
