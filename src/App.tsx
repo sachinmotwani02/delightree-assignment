@@ -124,7 +124,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <Box w="70%" mx="auto" mt={8}>
+    <Box w={{ lg: "70%", base: "90%" }} mx="auto" mt={8}>
       <Heading size="md" mb={6}>
         Basic Details
       </Heading>
