@@ -404,7 +404,6 @@ interface FormDataDisplayProps {
 }
 
 const FormDataDisplay: React.FC<FormDataDisplayProps> = ({ formData }) => {
-  console.log(formData);
   const formatDate = (date: string) => {
     try {
       const parsedDate = parse(date, "yyyy-MM-dd", new Date());
