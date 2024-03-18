@@ -275,6 +275,8 @@ const App: React.FC = () => {
 
                     if (new Date(value) > today) {
                       return "Invalid date";
+                    } else if (new Date("1900-01-01") > new Date(value)) {
+                      return "Invalid date";
                     }
                     return true;
                   },
